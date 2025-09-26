@@ -1,0 +1,62 @@
+body{
+    background: black;
+}
+.principal{
+    background: rgb(28, 28, 32);
+    display: flex;
+    justify-content: center;
+}
+.disc{
+    height: 100vh;
+    background-color: rgb(30, 30, 37);
+    font-family: 'montserrat', sans-serif;
+    width: 25vw;
+    align-self: center;
+}
+.disc h2{
+    color: white;
+    text-indent: 4%;
+}
+.disc h3{
+    color: gray;
+    text-indent: 4%;
+    margin-top: -20px;
+}
+.image{
+    width: 25vw;
+    display: flex;
+}
+
+.image img{
+    transform: scale(90%);
+    width: 25vw;
+    height: 25vw;
+    margin-top: -30px;
+}
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;         
+    padding: 0 4%;
+}
+
+.text-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.text-info h1 {
+  margin: 0;
+  color: white;
+}
+
+.text-info h3 {
+  margin: 0;
+  color: gray;
+}
+
+.plus-icon {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}

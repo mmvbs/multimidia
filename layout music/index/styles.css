@@ -9,10 +9,8 @@ body {
     background: rgb(33, 40, 48);
     height: 400px;
     width: 300px;
-    display:block;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
     align-items: center;
     border-radius: 10px;
 }

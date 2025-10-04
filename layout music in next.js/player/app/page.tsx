@@ -6,30 +6,40 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(0);
   const [progress, setProgress] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef(new Audio("WB.mp3"));
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   function togglePlay() {
     setIsPlaying(!isPlaying);
-    if (!isPlaying) {
-      audioRef.current.play();
+    const audio = audioRef.current;
+    if (!audio) return;
+   if (!isPlaying) {
+        audio.play().catch(e => console.error("Erro ao tentar tocar o áudio:", e));
     } else {
-      audioRef.current.pause();
+        audio.pause();
     }
-
   }
   useEffect(() => {
     const audio = audioRef.current;
+    if (!audio) return; 
+
     const updateProgress = () => {
-      setCurrentTime(audio.currentTime);
-      setProgress((audio.currentTime / audio.duration) * 100 || 0);
+        setCurrentTime(audio.currentTime);
+        setProgress((audio.currentTime / audio.duration) * 100 || 0);
     };
 
+    const handleLoadedMetadata = () => {
+        setDuration(audio.duration);
+    };
+    if (audio.duration > 0) {
+            setDuration(audio.duration);
+        }
+
     audio.addEventListener("timeupdate", updateProgress);
-    audio.addEventListener("loadedmetadata", () => {
-      setDuration(audio.duration);
-    });
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
 
     return () => {
-      audio.removeEventListener("timeupdate", updateProgress);
+        // Limpa os event listeners quando o componente é desmontado
+        audio.removeEventListener("timeupdate", updateProgress);
+        audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
     };
   }, []);
   const formatTime = (time: number) => {

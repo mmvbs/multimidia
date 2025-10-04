@@ -1,120 +1,72 @@
 "use client";
-
-import { useRef, useState, useEffect } from "react";
-import Image from "next/image";
+import { useRef, useState, useEffect} from "react";
 
 export default function Home() {
-  const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-
-  const togglePlay = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(new Audio("WB.mp3"));
+  function togglePlay() {
+    setIsPlaying(!isPlaying);
+    if (!isPlaying) {
+      audioRef.current.play();
     } else {
-      audio.play();
-      setIsPlaying(true);
+      audioRef.current.pause();
     }
-  };
 
-  const handleTimeUpdate = () => {
-    const audio = audioRef.current;
-    if (audio) setCurrentTime(audio.currentTime);
-  };
-
-  const handleLoadedMetadata = () => {
-    const audio = audioRef.current;
-    if (audio) setDuration(audio.duration);
-  };
-
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    const audio = audioRef.current;
-    if (!audio || !duration) return;
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percent = clickX / rect.width;
-    audio.currentTime = percent * duration;
-    setCurrentTime(audio.currentTime);
-  };
-
-  const formatTime = (time: number) => {
-    const minutes = Math.floor(time / 60);
-    const seconds = Math.floor(time % 60)
-      .toString()
-      .padStart(2, "0");
-    return `${minutes}:${seconds}`;
-  };
-
+  }
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    const updateProgress = () => {
+      setCurrentTime(audio.currentTime);
+      setProgress((audio.currentTime / audio.duration) * 100 || 0);
+    };
 
-    audio.addEventListener("timeupdate", handleTimeUpdate);
-    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+    audio.addEventListener("timeupdate", updateProgress);
+    audio.addEventListener("loadedmetadata", () => {
+      setDuration(audio.duration);
+    });
 
     return () => {
-      audio.removeEventListener("timeupdate", handleTimeUpdate);
-      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      audio.removeEventListener("timeupdate", updateProgress);
     };
   }, []);
-
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  }
   return (
-    <div className="bg-[#0f1316] flex justify-center min-h-screen items-center font-sans">
-      <div className="bg-[#212830] h-[400px] w-[300px] flex flex-col items-center rounded-lg p-4">
-        <Image
-          src="/a.jpg"
-          alt="Album cover"
-          width={200}
-          height={200}
-          className="rounded-md mt-2"
-        />
-        <h1 className="text-white text-sm mt-3">Twin Flame</h1>
-        <h3 className="text-gray-400 text-xs m-0">Weyes Blood</h3>
-
-        <div className="w-3/4 mt-3">
-          <div
-            className="w-full h-2 bg-[#0f1316] rounded cursor-pointer relative"
-            onClick={handleSeek}
-          >
-            <div
-              className="h-2 bg-[#ff302e] rounded"
-              style={{ width: duration ? `${(currentTime / duration) * 100}%` : "0%" }}
-            ></div>
-          </div>
-          <div className="flex justify-between text-gray-400 text-[10px] mt-1">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
-          </div>
+     <div className="bg-[rgb(15,19,22)] flex items-center justify-center h-screen">
+      <div className="bg-[#202830] h-[400px] w-[300px] rounded-[10px] flex flex-col items-center justify-center p-4">
+        <img className="h-[200] w-[200]" src="a.jpg" alt="" />
+        <h1 className="text-white text-[16px] font-bold mt-4">Twin Flame</h1>
+        <h3 className="text-[gray] text-[12px] mt-2">Weyes Blood</h3>
+      <div className="w-[50%]">
+        <div className="w-[100%] h-[4px] bg-[rgb(15,19,22)] rounded-full mt-4">
+         <div className="h-[4px] bg-[#ff302e] rounded-full" style={{ width: `${progress}%` }} ></div>
         </div>
-
-        <div className="flex gap-5 items-center mt-4">
-          <h3 className="text-white cursor-pointer transform -scale-x-100">▶▶</h3>
-          <button
-            onClick={togglePlay}
-            className="flex justify-center items-center bg-[#ff302e] rounded-full h-8 w-8 cursor-pointer text-white text-sm"
-            aria-label={isPlaying ? "Pause" : "Play"}
-            type="button"
-          >
-            {isPlaying ? "⏸" : "▶"}
-          </button>
-          <h3 className="text-white cursor-pointer">▶▶</h3>
-          <Image
-            src="/vol.png"
-            alt="volume"
-            width={12}
-            height={12}
-            className="cursor-pointer"
-          />
+        <div className="rounded-full mt-4 flex justify-between text-[12px] text-[gray]">
+        <h3>{formatTime(currentTime)}</h3>
+        <h3>{formatTime(duration)}</h3>
         </div>
-
-        <audio ref={audioRef} src="/WB.mp3" />
       </div>
-    </div>
+      <div className="flex items-center justify-between w-[70%] mt-4">
+        <h3 className="scale-x-[-1]">▶▶</h3>  
+        <button
+        className="text-white text-xl w-[30px] rounded-full h-8 w-8 bg-[#ff302e] flex items-center justify-center"
+        onClick={togglePlay}
+        >
+        {isPlaying ? "⏸" : "▶"}
+        </button>
+        <audio src="WB.mp3" ref={audioRef}>
+          <track kind="captions" />
+        </audio>
+        <h3>▶▶</h3>
+        <img src="vol.png" alt="volume" className="vol h-[12] w-[12] cursor-pointer" />
+      </div>
+      </div>
+     </div>
   );
 }
